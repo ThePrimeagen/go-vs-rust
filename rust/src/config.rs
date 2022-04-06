@@ -12,12 +12,19 @@ pub struct Config {
 
 impl Config {
 
+    pub fn new() -> Config {
+        return Config {
+            links: HashMap::new(),
+            projector: HashMap::new(),
+        }
+    }
+
     pub fn from_file(file: File) -> Result<Config, ProjectorError> {
         return Ok(serde_json::from_reader(file)?);
     }
 
-    pub fn get_value(self, path: PathBuf, key: String) -> Option<String> {
-        let mut p: Option<&Path> = Some(&path);
+    pub fn get_value(&self, path: &PathBuf, key: &str) -> Option<String> {
+        let mut p: Option<&Path> = Some(path);
         let mut value = None;
 
         loop {
@@ -29,7 +36,7 @@ impl Config {
 
             let path_map = self.projector.get(p.unwrap());
             if path_map.is_some() {
-                if let Some(v) = path_map.unwrap().get(&key) {
+                if let Some(v) = path_map.unwrap().get(key) {
                     value = Some(v.to_string());
                     break;
                 }
@@ -42,10 +49,10 @@ impl Config {
             return value;
         }
 
-        for link in self.links.get(&path).iter().flat_map(|x| x.iter()) {
+        for link in self.links.get(path).iter().flat_map(|x| x.iter()) {
             let path_map = self.projector.get(link);
             if path_map.is_some() {
-                if let Some(v) = path_map.unwrap().get(&key) {
+                if let Some(v) = path_map.unwrap().get(key) {
                     value = Some(v.to_string());
                     break;
                 }
@@ -92,8 +99,29 @@ mod test {
 
     #[test]
     fn test_get_value() -> Result<(), Box<dyn std::error::Error>> {
-        assert_eq!(false, true);
+        let mut config = Config::new();
+
+        let path = PathBuf::from("/home/test");
+        let path2 = PathBuf::from("/home/test/foo");
+
+        config.projector.insert(
+            path.clone(),
+            HashMap::from([
+                ("foo".to_string(), "baz".to_string()),
+            ])
+        );
+
+        config.projector.insert(
+            path2.clone(),
+            HashMap::from([
+                ("foo".to_string(), "baz2".to_string()),
+                ("buzz".to_string(), "baz".to_string()),
+            ])
+        );
+
+        assert_eq!(config.get_value(&path, "foo"), Some("baz".to_string()));
+        assert_eq!(config.get_value(&path2, "foo"), Some("baz2".to_string()));
+
         return Ok(());
     }
 }
-
