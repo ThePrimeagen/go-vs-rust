@@ -2,7 +2,7 @@ use std::{path::PathBuf, fs::File};
 
 use structopt::StructOpt;
 
-use crate::{operations::operation::Operation, error::ProjectorError, file::open_or_create, config::get_config_path};
+use crate::{operations::operation::Operation, error::ProjectorError, file::open_or_create, config::{get_config_path, Config}};
 
 #[derive(Debug, StructOpt, Clone)]
 pub struct ProjectorOpts {
@@ -33,7 +33,7 @@ pub struct ProjectorOpts {
 
 pub struct ProjectorConfig {
     pub pwd: PathBuf,
-    pub config: File,
+    pub config: Config,
     pub operation: Operation,
     pub terms: Vec<String>,
 }
@@ -46,6 +46,7 @@ impl TryFrom<ProjectorOpts> for ProjectorConfig {
 
         let config = get_config_path(value.config)?;
         let config = open_or_create(&config)?;
+        let config = Config::from_file(config)?;
 
         return Ok(ProjectorConfig {
             pwd,

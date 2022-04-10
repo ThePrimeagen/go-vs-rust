@@ -23,6 +23,8 @@ impl Config {
         return Ok(serde_json::from_reader(file)?);
     }
 
+    pub fn add(&mut self, key:
+
     pub fn get_value(&self, path: &PathBuf, key: &str) -> Option<String> {
         let mut p: Option<&Path> = Some(path);
         let mut value = None;

@@ -4,7 +4,7 @@ use structopt::StructOpt;
 fn main() -> Result<(), ProjectorError> {
     let args: ProjectorConfig = ProjectorOpts::from_args().try_into()?;
 
-    process(args);
+    process(args)?;
 
     return Ok(());
 }

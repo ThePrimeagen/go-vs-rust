@@ -10,6 +10,12 @@ pub enum ProjectorError {
 
     #[error("serde json decoding error")]
     SerdeJsonError(#[from] serde_json::Error),
+
+    #[error("invalid argument count (expected {expected:?}, found {found:?})")]
+    InvalidArguments{
+        expected: usize,
+        found: usize,
+    },
 }
 
 
