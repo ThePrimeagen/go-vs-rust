@@ -23,7 +23,16 @@ impl Config {
         return Ok(serde_json::from_reader(file)?);
     }
 
-    pub fn add(&mut self, key:
+    pub fn add(&mut self, dir: PathBuf, key: &str, value: &str) {
+        if !self.projector.contains_key(&dir) {
+            self.projector.insert(dir.clone(), HashMap::new());
+        }
+
+        self.projector
+            .get_mut(&dir)
+            .expect("should always exist")
+            .insert(key.to_string(), value.to_string());
+    }
 
     pub fn get_value(&self, path: &PathBuf, key: &str) -> Option<String> {
         let mut p: Option<&Path> = Some(path);
@@ -99,8 +108,7 @@ mod test {
         return Ok(());
     }
 
-    #[test]
-    fn test_get_value() -> Result<(), Box<dyn std::error::Error>> {
+    fn get_config() -> (Config, PathBuf, PathBuf) {
         let mut config = Config::new();
 
         let path = PathBuf::from("/home/test");
@@ -121,9 +129,30 @@ mod test {
             ])
         );
 
+        return (config, path, path2);
+    }
+
+    #[test]
+    fn test_get_value() -> Result<(), Box<dyn std::error::Error>> {
+        let (config, path, path2) = get_config();
+
         assert_eq!(config.get_value(&path, "foo"), Some("baz".to_string()));
         assert_eq!(config.get_value(&path2, "foo"), Some("baz2".to_string()));
 
         return Ok(());
     }
+
+    #[test]
+    fn add_value() -> Result<(), ProjectorError> {
+        let (mut config, path, path2) = get_config();
+
+        config.add(path.clone(), "foo", "bar");
+
+        assert_eq!(config.get_value(&path, "foo"), Some("bar".to_string()));
+        assert_eq!(config.get_value(&path2, "foo"), Some("baz2".to_string()));
+
+        return Ok(());
+    }
+
 }
+

@@ -23,12 +23,18 @@ const (
 	Print
 )
 
-type Config struct {
+type ProjectorConfig struct {
 	Pwd    string
-	Config string
+	Config Config
 
 	Operation Operation
 	Terms     []string
+}
+
+type MapOfStrings = map[string]string
+type Config struct {
+    links MapOfStrings
+    projector map[string]MapOfStrings
 }
 
 func nameToOperation(cmd string) Operation {
@@ -41,7 +47,7 @@ func nameToOperation(cmd string) Operation {
     return Print
 }
 
-func NewConfig(cmd string, opts Opts) Config {
+func NewConfig(cmd string, opts Opts) ProjectorConfig {
 	pwd := opts.String("pwd")
 	if pwd == "" {
 		oswd, err := os.Getwd()
@@ -62,7 +68,7 @@ func NewConfig(cmd string, opts Opts) Config {
 		config = configHome
 	}
 
-	return Config {
+	return ProjectorConfig {
         Pwd: pwd,
         Config: config,
         Operation: nameToOperation(cmd),
