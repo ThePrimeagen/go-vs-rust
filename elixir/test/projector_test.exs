@@ -1,8 +1,9 @@
 defmodule ProjectorTest do
   use ExUnit.Case
-  doctest Projector
 
-  test "greets the world" do
-    assert Projector.hello() == :world
+  doctest Projector, import: true
+
+  test "true is true" do
+    assert true
   end
 end

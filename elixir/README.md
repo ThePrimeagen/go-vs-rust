@@ -1,21 +1,9 @@
 # Projector
 
-**TODO: Add description**
+## Usage
 
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `projector` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:projector, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/projector>.
-
+ 1. Run `mix deps.get` to fetch dependencies.
+ 2. Run `mix compile` to do the initial compile.
+ 3. Run `mix test` for tests.
+ 4. Run `mix help projector` to see command line instructions.
+ 5. Run web server with `mix run --no-halt` (or `iex -S mix` if you want an interactive shell).
