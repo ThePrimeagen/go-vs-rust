@@ -24,9 +24,18 @@ defmodule Projector.Project do
 
   @doc """
   Create a new `Project` struct from a map.
+
+  ## Example
+
+      iex> new!(%{projects: %{"foo" => %{"bar" => "baz"}}})
+      %Project{aliases: %{}, projects: %{"foo" => %{"bar" => "baz"}}}
+
+      iex> new!()
+      %Project{aliases: %{}, projects: %{}}
+
   """
   @spec new!(map()) :: t()
-  def new!(attrs) when is_map(attrs) do
+  def new!(attrs \\ %{}) when is_map(attrs) do
     struct!(Project, attrs)
   end
 
@@ -41,12 +50,27 @@ defmodule Projector.Project do
       |> Jason.decode!()
       |> new!()
     else
-      %Project{}
+      new!()
     end
   end
 
   @doc """
   Get the value from the project for a specific path and key.
+
+  ## Examples
+
+      iex> project = new!(%{projects: %{"/foo" => %{"bar" => "baz"}}})
+      iex> get_value(project, "/foo", "bar")
+      "baz"
+
+      iex> project = new!(%{aliases: %{"/fizz" => "/foo"}, projects: %{"/foo" => %{"bar" => "baz"}}})
+      iex> get_value(project, "/fizz", "bar")
+      "baz"
+
+      iex> project = new!(%{projects: %{"/foo" => %{"bar" => "baz"}}})
+      iex> get_value(project, "/foo", "banana")
+      nil
+
   """
   @spec get_value(t(), path(), key()) :: value() | nil
   def get_value(%Project{} = project, path, key) do
@@ -68,14 +92,34 @@ defmodule Projector.Project do
 
   @doc """
   Put the value of the key in the project's path.
+
+  ## Examples
+
+      iex> put_value(new!(), "/foo", "bar", "baz")
+      %Project{projects: %{"/foo" => %{"bar" => "baz"}}}
+
+      iex> project = %Project{projects: %{"/foo" => %{"bar" => "baz"}}}
+      iex> put_value(project, "/foo", "bar", "banana")
+      %Project{projects: %{"/foo" => %{"bar" => "banana"}}}
+
   """
   @spec put_value(t(), path(), key(), value()) :: t()
   def put_value(%Project{} = project, path, key, value) do
-    %Project{project | projects: put_in(project.projects, [path, key], value)}
+    %Project{
+      project
+      | projects: put_in(project.projects, Enum.map([path, key], &Access.key(&1, %{})), value)
+    }
   end
 
   @doc """
   Delete the key/value pair of the key in the project's path.
+
+  ## Example
+
+      iex> project = %Project{projects: %{"/foo" => %{"bar" => "baz"}}}
+      iex> delete(project, "/foo", "bar")
+      %Project{projects: %{"/foo" => %{}}}
+
   """
   @spec delete(t(), path(), key()) :: t()
   def delete(%Project{} = project, path, key) do
@@ -84,6 +128,13 @@ defmodule Projector.Project do
 
   @doc """
   Delete the project path.
+
+  ## Example
+
+      iex> project = %Project{projects: %{"/foo" => %{"bar" => "baz"}}}
+      iex> delete(project, "/foo")
+      %Project{projects: %{}}
+
   """
   @spec delete(t(), path()) :: t()
   def delete(%Project{} = project, path) do
@@ -92,6 +143,13 @@ defmodule Projector.Project do
 
   @doc """
   Put the alias.
+
+  ## Example
+
+      iex> project = %Project{projects: %{"/foo" => %{"bar" => "baz"}}}
+      iex> put_alias(project, "/fizz", "/foo")
+      %Project{aliases: %{"/fizz" => "/foo"}, projects: %{"/foo" => %{"bar" => "baz"}}}
+
   """
   @spec put_alias(t(), path(), path()) :: t()
   def put_alias(%Project{} = project, from_path, to_path) do
@@ -99,7 +157,14 @@ defmodule Projector.Project do
   end
 
   @doc """
-  Put the alias.
+  Delete an alias.
+
+  ## Example
+
+      iex> project = %Project{aliases: %{"/fizz" => "/foo"}, projects: %{"/foo" => %{"bar" => "baz"}}}
+      iex> delete_alias(project, "/fizz")
+      %Project{aliases: %{}, projects: %{"/foo" => %{"bar" => "baz"}}}
+
   """
   @spec delete_alias(t(), path()) :: t()
   def delete_alias(%Project{} = project, from_path) do
