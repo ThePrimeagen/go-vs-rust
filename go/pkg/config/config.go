@@ -35,7 +35,7 @@ type ProjectorConfig struct {
 
 type MapOfStrings = map[string]string
 type Config struct {
-    Links MapOfStrings `json:"links"`
+    Links map[string][]string `json:"links"`
     Projector map[string]MapOfStrings `json:"projector"`
 }
 
@@ -72,9 +72,11 @@ func (c *Config) GetValue(pwd, key string) (string, bool) {
         pwd = pwd_next
     }
 
-    for _, link := range c.Links {
-        if val, ok := c.getValue(link, key); ok {
-            return val, true
+    if linkSet, ok := c.Links[pwd]; ok {
+        for _, link := range linkSet {
+            if val, ok := c.getValue(link, key); ok {
+                return val, true
+            }
         }
     }
 

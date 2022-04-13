@@ -12,7 +12,7 @@ func TestProjectorAdd(t *testing.T) {
     cfg := &config.ProjectorConfig {
         Pwd: pwd,
         Config: &config.Config {
-            Links: map[string]string{},
+            Links: map[string][]string{},
             Projector: map[string]map[string]string{},
         },
         Operation: config.Add,

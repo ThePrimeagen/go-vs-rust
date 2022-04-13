@@ -6,8 +6,6 @@ const operations = new Map<Operation, OperationFn>([
     [Operation.Add, add],
 ]);
 
-export default function projectorerate(config: ProjectorConfig) {
-    switch (config.operation) {
-    case Operation.Add:
-    }
+export default function projector(config: ProjectorConfig) {
+    operations.get(config.operation)(config);
 }
