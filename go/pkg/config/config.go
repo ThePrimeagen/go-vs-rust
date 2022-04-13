@@ -1,7 +1,8 @@
 package config
 
 import (
-	"fmt"
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"os"
 
@@ -33,8 +34,41 @@ type ProjectorConfig struct {
 
 type MapOfStrings = map[string]string
 type Config struct {
-    links MapOfStrings
-    projector map[string]MapOfStrings
+    Links MapOfStrings `json:"links"`
+    Projector map[string]MapOfStrings `json:"projector"`
+}
+
+func getConfigFromFile(path string) (*Config, error) {
+    if _, err := os.Stat(path); os.IsNotExist(err) {
+        {
+            f, err := os.Create(path)
+            if err != nil {
+                return nil, err
+            }
+            defer func() {
+                log.Println("Defer");
+                f.Close()
+            }()
+
+            _, err = f.WriteString("{\"links\": {}, \"projector\": {}}\n")
+            if err != nil {
+                return nil, err
+            }
+
+            f.Sync()
+        }
+        log.Println("Post Defer");
+    }
+
+    content, err := ioutil.ReadFile(path)
+    if err != nil {
+        return nil, err
+    }
+
+    var config Config
+    json.Unmarshal(content, &config)
+
+    return &config, nil
 }
 
 func nameToOperation(cmd string) Operation {
@@ -47,31 +81,51 @@ func nameToOperation(cmd string) Operation {
     return Print
 }
 
-func NewConfig(cmd string, opts Opts) ProjectorConfig {
-	pwd := opts.String("pwd")
+func getPWDPath(pwd string) (string, error) {
 	if pwd == "" {
 		oswd, err := os.Getwd()
 		if err != nil {
-			log.Fatalf("%+v\n", err)
+            return "", err
 		}
 
 		pwd = oswd
 	}
 
-	config := opts.String("config")
-    fmt.Printf("NewConfig %v %v\n", config, opts)
+    return pwd, nil
+}
+
+func getConfigPath(config string) (string, error) {
 	if config == "" {
 		configHome, err := os.UserConfigDir()
 		if err != nil {
-			log.Fatalf("Your operating system sucks so much, it does not have a config home.  Go cry in windows child.  Unless you use Arch, then go cry in maidenless. %+v\n", err)
+            return "", err
 		}
 		config = configHome
 	}
 
-	return ProjectorConfig {
+    return config, nil
+}
+
+func NewConfig(cmd string, opts Opts) (*ProjectorConfig, error) {
+    pwd, err := getPWDPath(opts.String("pwd"))
+    if err != nil {
+        return nil, err
+    }
+
+    config, err := getConfigPath(opts.String("config"))
+    if err != nil {
+        return nil, err
+    }
+
+    cfg, err := getConfigFromFile(config)
+    if err != nil {
+        log.Fatalf("Unable to read config file: %+v\n", err)
+    }
+
+	return &ProjectorConfig {
         Pwd: pwd,
-        Config: config,
+        Config: *cfg,
         Operation: nameToOperation(cmd),
         Terms: opts.Args().Tail(),
-    }
+    }, nil
 }

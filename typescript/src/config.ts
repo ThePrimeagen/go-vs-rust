@@ -15,7 +15,7 @@ export default class Config {
 
     static fromFile(file: string): Config {
         if (!fs.existsSync(file)) {
-            fs.writeFileSync(file, "{}");
+            fs.writeFileSync(file, "{\"links\": {}, \"projector\": {}}");
         }
 
         const contents = JSON.parse(fs.readFileSync(file).toString()) as ConfigFromFile;
