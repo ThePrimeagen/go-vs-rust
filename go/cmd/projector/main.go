@@ -27,7 +27,11 @@ func init() {
 
 func generateAction(name, from string) func(*cli.Context) error {
     return func(c *cli.Context) error {
-        cfg := config.NewConfig(name, c)
+        cfg, err := config.NewConfig(name, c)
+        if err != nil {
+            return err
+        }
+
         log.Printf("generateAction(%v) %v", from, cfg)
         projector.Projector(cfg)
         return nil;

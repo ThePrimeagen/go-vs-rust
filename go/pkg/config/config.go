@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/urfave/cli/v2"
 )
@@ -26,7 +27,7 @@ const (
 
 type ProjectorConfig struct {
 	Pwd    string
-	Config Config
+	Config *Config
 
 	Operation Operation
 	Terms     []string
@@ -36,6 +37,48 @@ type MapOfStrings = map[string]string
 type Config struct {
     Links MapOfStrings `json:"links"`
     Projector map[string]MapOfStrings `json:"projector"`
+}
+
+func (c *Config) AddValue(pwd, key, value string) {
+    var path MapOfStrings
+    if _, found := c.Projector[pwd]; !found {
+        c.Projector[pwd] = map[string]string{}
+        path = c.Projector[pwd]
+    }
+
+    path[key] = value
+}
+
+func (c *Config) getValue(pwd, key string) (string, bool) {
+    if _, ok := c.Projector[pwd]; !ok {
+        return "", false
+    }
+
+    val, ok := c.Projector[pwd][key]
+    return val, ok
+}
+
+func (c *Config) GetValue(pwd, key string) (string, bool) {
+    for {
+        if val, ok := c.getValue(pwd, key); ok {
+            return val, true
+        }
+
+        pwd_next := filepath.Dir(pwd)
+        if pwd == pwd_next {
+            break
+        }
+
+        pwd = pwd_next
+    }
+
+    for _, link := range c.Links {
+        if val, ok := c.getValue(link, key); ok {
+            return val, true
+        }
+    }
+
+    return "", false
 }
 
 func getConfigFromFile(path string) (*Config, error) {
@@ -124,7 +167,7 @@ func NewConfig(cmd string, opts Opts) (*ProjectorConfig, error) {
 
 	return &ProjectorConfig {
         Pwd: pwd,
-        Config: *cfg,
+        Config: cfg,
         Operation: nameToOperation(cmd),
         Terms: opts.Args().Tail(),
     }, nil
