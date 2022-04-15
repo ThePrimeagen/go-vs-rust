@@ -17,10 +17,21 @@ func add(cfg *config.ProjectorConfig) error {
     return nil
 }
 
+func remove(cfg *config.ProjectorConfig) error {
+
+    if len(cfg.Terms) != 1 {
+        return fmt.Errorf("invalid argument count (expected 2, found %v)", len(cfg.Terms))
+    }
+
+
+    return nil
+}
+
 func Projector(cfg *config.ProjectorConfig) {
 
     switch cfg.Operation {
     case config.Add: add(cfg)
+    case config.Remove: remove(cfg)
     }
 }
 

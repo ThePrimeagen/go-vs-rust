@@ -23,13 +23,19 @@ impl Config {
         return Ok(serde_json::from_reader(file)?);
     }
 
-    pub fn add(&mut self, dir: PathBuf, key: &str, value: &str) {
-        if !self.projector.contains_key(&dir) {
+    pub fn remove(&mut self, dir: &PathBuf, key: &str) {
+        if let Some(hash_map) = self.projector.get_mut(dir) {
+            hash_map.remove(key);
+        }
+    }
+
+    pub fn add(&mut self, dir: &PathBuf, key: &str, value: &str) {
+        if !self.projector.contains_key(dir) {
             self.projector.insert(dir.clone(), HashMap::new());
         }
 
         self.projector
-            .get_mut(&dir)
+            .get_mut(dir)
             .expect("should always exist")
             .insert(key.to_string(), value.to_string());
     }
@@ -146,10 +152,23 @@ mod test {
     fn add_value() -> Result<(), ProjectorError> {
         let (mut config, path, path2) = get_config();
 
-        config.add(path.clone(), "foo", "bar");
+        config.add(&path, "foo", "bar");
 
         assert_eq!(config.get_value(&path, "foo"), Some("bar".to_string()));
         assert_eq!(config.get_value(&path2, "foo"), Some("baz2".to_string()));
+
+        return Ok(());
+    }
+
+    #[test]
+    fn remove_value() -> Result<(), ProjectorError> {
+        let (mut config, path, _) = get_config();
+
+        assert_eq!(config.get_value(&path, "foo"), Some("baz".to_string()));
+
+        config.remove(&path, "foo");
+
+        assert_eq!(config.get_value(&path, "foo"), None);
 
         return Ok(());
     }

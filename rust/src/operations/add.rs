@@ -12,7 +12,7 @@ pub fn add(cfg: &mut ProjectorConfig) -> Result<(), ProjectorError> {
     let value = cfg.terms.get(1).expect("expect value to exist");
 
     // todo: i don't like this.
-    cfg.config.add(cfg.pwd.clone(), key, value);
+    cfg.config.add(&cfg.pwd, key, value);
 
     return Ok(());
 }

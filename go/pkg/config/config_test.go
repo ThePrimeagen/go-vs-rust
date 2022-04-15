@@ -40,4 +40,25 @@ func TestGetConfigPathProvided(t *testing.T) {
 }
 
 
+func TestGetConfigRemove(t *testing.T) {
+
+    config := config.Config {
+        Links: map[string][]string{},
+        Projector: map[string]map[string]string{},
+    }
+
+    path := "/foo/bar"
+    config.AddValue(path, "baz", "theo");
+    value, found := config.GetValue(path, "baz")
+
+    if !found {
+        t.Errorf("Did not find the value baz")
+    }
+
+    if value != "theo" {
+        t.Errorf("Expected %v to equal \"theo\"", value)
+    }
+}
+
+
 

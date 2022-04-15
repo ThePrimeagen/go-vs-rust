@@ -49,6 +49,15 @@ func (c *Config) AddValue(pwd, key, value string) {
     path[key] = value
 }
 
+func (c *Config) RemoveValue(pwd, key string) {
+    hashMap, found := c.Projector[pwd]
+    if !found {
+        return;
+    }
+
+    delete(hashMap, key)
+}
+
 func (c *Config) getValue(pwd, key string) (string, bool) {
     if _, ok := c.Projector[pwd]; !ok {
         return "", false
