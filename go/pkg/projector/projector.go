@@ -28,12 +28,15 @@ func remove(cfg *config.ProjectorConfig) error {
     return nil
 }
 
-func Projector(cfg *config.ProjectorConfig) {
+func Projector(cfg *config.ProjectorConfig) error {
 
+    var err error
     switch cfg.Operation {
-    case config.Add: add(cfg)
-    case config.Remove: remove(cfg)
+    case config.Add: err = add(cfg)
+    case config.Remove: err = remove(cfg)
     }
+
+    return err
 }
 
 

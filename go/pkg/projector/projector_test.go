@@ -73,4 +73,24 @@ func TestProjectorRemove(t *testing.T) {
     }
 }
 
+func TestProjectorRemoveBadArgs(t *testing.T) {
+    pwd := "/foo/bar"
+    cfg := &config.ProjectorConfig {
+        Pwd: pwd,
+        Config: &config.Config {
+            Links: map[string][]string{},
+            Projector: map[string]map[string]string{
+                pwd: {},
+            },
+        },
+        Operation: config.Remove,
+        Terms: []string{"foo", "foo2"},
+    }
+
+    err := projector.Projector(cfg)
+    if err == nil {
+        t.Errorf("expected there to be an error because provided 2 arguments")
+    }
+}
+
 
