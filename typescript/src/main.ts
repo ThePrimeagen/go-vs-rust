@@ -1,5 +1,6 @@
 import * as cla from "command-line-args";
 import createConfig from "./opts";
+import projector from "./operation";
 
 const optionDefinitions = [
     { name: 'config', alias: 'c', type: String },
@@ -8,3 +9,6 @@ const optionDefinitions = [
 ]
 
 const config = createConfig(cla(optionDefinitions));
+projector(config);
+
+

@@ -50,6 +50,14 @@ export default class Config {
         this.projector.get(pwd).set(key, value);
     }
 
+    public removeValue(pwd: string, key: string): void {
+        if (!this.projector.has(pwd)) {
+            return;
+        }
+
+        this.projector.get(pwd).delete(key);
+    }
+
     private _getValue(pwd: string, key: string): string | undefined {
         const values = this.projector.get(pwd);
         if (!values) {
