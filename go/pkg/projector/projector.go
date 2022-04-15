@@ -23,6 +23,7 @@ func remove(cfg *config.ProjectorConfig) error {
         return fmt.Errorf("invalid argument count (expected 2, found %v)", len(cfg.Terms))
     }
 
+    cfg.Config.RemoveValue(cfg.Pwd, cfg.Terms[0])
 
     return nil
 }
